@@ -27,6 +27,36 @@ import (
 	"github.com/urfave/negroni"
 )
 
+// List of paths to route to the Vue frontend.
+// TODO(mdempsky): Automate keeping in sync with frontend/adb.js.
+var vuePaths = []string{
+	"/",
+	"/list_events",
+	"/update_event/{event_id:[0-9]+}",
+
+	"/new_connection",
+	"/list_connections",
+	"/update_connection/{event_id:[0-9]+}",
+	"/activist_pool",
+
+	"/circle_member_prospects",
+	"/list_circles",
+
+	"/chapter_member_prospects",
+	"/chapter_member_development",
+
+	"/organizer_prospects",
+	"/activist_development",
+	"/list_working_groups",
+
+	"/list_activists",
+	"/leaderboard",
+	"/activist_recruitment",
+	"/activist_actionteam",
+
+	"/admin/users",
+}
+
 func flashMessageSuccess(w http.ResponseWriter, message string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "flash_message_success",
@@ -122,29 +152,10 @@ func router() (*mux.Router, *sqlx.DB) {
 	router.Handle("/403", alice.New(main.authMiddleware).ThenFunc(main.ForbiddenHandler))
 
 	// Authed pages
-	router.Handle("/", alice.New(main.authMiddleware).ThenFunc(main.UpdateEventHandler))
-	router.Handle("/update_event/{event_id:[0-9]+}", alice.New(main.authMiddleware).ThenFunc(main.UpdateEventHandler))
-	router.Handle("/new_connection", alice.New(main.authMiddleware).ThenFunc(main.UpdateConnectionHandler))
-	router.Handle("/update_connection/{event_id:[0-9]+}", alice.New(main.authMiddleware).ThenFunc(main.UpdateConnectionHandler))
-	router.Handle("/update_event/{event_id:[0-9]+}", alice.New(main.authMiddleware).ThenFunc(main.UpdateEventHandler))
-	router.Handle("/list_events", alice.New(main.authMiddleware).ThenFunc(main.ListEventsHandler))
-	router.Handle("/list_connections", alice.New(main.authMiddleware).ThenFunc(main.ListConnectionsHandler))
-	router.Handle("/list_activists", alice.New(main.authMiddleware).ThenFunc(main.ListActivistsHandler))
-	router.Handle("/activist_pool", alice.New(main.authMiddleware).ThenFunc(main.ListActivistsPoolHandler))
-	router.Handle("/activist_recruitment", alice.New(main.authMiddleware).ThenFunc(main.ListActivistsRecruitmentHandler))
-	router.Handle("/activist_actionteam", alice.New(main.authMiddleware).ThenFunc(main.ListActivistsActionTeamHandler))
-	router.Handle("/activist_development", alice.New(main.authMiddleware).ThenFunc(main.ListActivistsDevelopmentHandler))
-	router.Handle("/organizer_prospects", alice.New(main.authMiddleware).ThenFunc(main.ListOrganizerProspectsHandler))
-	router.Handle("/chapter_member_prospects", alice.New(main.authMiddleware).ThenFunc(main.ListChapterMemberProspectsHandler))
-	router.Handle("/chapter_member_development", alice.New(main.authMiddleware).ThenFunc(main.ListChapterMemberDevelopmentHandler))
-	router.Handle("/circle_member_prospects", alice.New(main.authMiddleware).ThenFunc(main.ListCircleMemberProspectsHandler))
-	router.Handle("/leaderboard", alice.New(main.authMiddleware).ThenFunc(main.LeaderboardHandler))
+	for _, path := range vuePaths {
+		router.Handle(path, alice.New(main.authMiddleware).ThenFunc(main.VueHandler))
+	}
 	router.Handle("/power", alice.New(main.authMiddleware).ThenFunc(main.PowerHandler)) // TODO: rename
-	router.Handle("/list_working_groups", alice.New(main.authMiddleware).ThenFunc(main.ListWorkingGroupsHandler))
-	router.Handle("/list_circles", alice.New(main.authMiddleware).ThenFunc(main.ListCirclesHandler))
-
-	// Authed Admin pages
-	router.Handle("/admin/users", alice.New(main.authAdminMiddleware).ThenFunc(main.ListUsersHandler))
 
 	// Unauthed API
 	router.HandleFunc("/tokensignin", main.TokenSignInHandler)
@@ -335,139 +346,8 @@ func (c MainController) ForbiddenHandler(w http.ResponseWriter, r *http.Request)
 	renderPage(w, "403", PageData{PageName: "403 - Forbidden", IsAdmin: getUserFromContext(r.Context()).Admin})
 }
 
-func (c MainController) ListEventsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "event_list", PageData{PageName: "EventList", IsAdmin: getUserFromContext(r.Context()).Admin})
-}
-
-func (c MainController) ListConnectionsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "connection_list", PageData{PageName: "ConnectionsList", IsAdmin: getUserFromContext(r.Context()).Admin})
-}
-
-type ActivistListData struct {
-	Title string
-	View  string
-}
-
-func (c MainController) ListActivistsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "ActivistList",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "All Activists",
-			View:  "all_activists",
-		},
-	})
-}
-
-func (c MainController) ListActivistsPoolHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "ActivistPool",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Recruitment Connections",
-			View:  "activist_pool",
-		},
-	})
-}
-
-func (c MainController) ListActivistsRecruitmentHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "ActivistRecruitment",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Activist Recruitment",
-			View:  "activist_recruitment",
-		},
-	})
-}
-
-func (c MainController) ListActivistsActionTeamHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "ActivistActionTeam",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Action Team",
-			View:  "action_team",
-		},
-	})
-}
-
-func (c MainController) ListActivistsDevelopmentHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "OrganizerDevelopment",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Organizer Development",
-			View:  "development",
-		},
-	})
-}
-
-func (c MainController) ListChapterMemberDevelopmentHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "ChapterMemberDevelopment",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Chapter Member Development",
-			View:  "chapter_member_development",
-		},
-	})
-}
-
-func (c MainController) ListOrganizerProspectsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "OrganizerProspects",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Organizer Prospects",
-			View:  "organizer_prospects",
-		},
-	})
-}
-
-func (c MainController) ListChapterMemberProspectsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "ChapterMemberProspects",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Chapter Member Prospects",
-			View:  "chapter_member_prospects",
-		},
-	})
-}
-
-func (c MainController) ListCircleMemberProspectsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "CircleMemberProspects",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Circle Member Prospects",
-			View:  "circle_member_prospects",
-		},
-	})
-}
-
-func (c MainController) ListWorkingGroupsHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "working_group_list", PageData{PageName: "WorkingGroupList", IsAdmin: getUserFromContext(r.Context()).Admin})
-}
-
-func (c MainController) ListCirclesHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "circles_list", PageData{PageName: "CirclesList", IsAdmin: getUserFromContext(r.Context()).Admin})
-}
-
-func (c MainController) LeaderboardHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "activist_list", PageData{
-		PageName: "Leaderboard",
-		IsAdmin:  getUserFromContext(r.Context()).Admin,
-		Data: ActivistListData{
-			Title: "Leaderboard",
-			View:  "leaderboard",
-		},
-	})
-}
-
-func (c MainController) ListUsersHandler(w http.ResponseWriter, r *http.Request) {
-	renderPage(w, "user_list", PageData{PageName: "UserList", IsAdmin: getUserFromContext(r.Context()).Admin})
+func (c MainController) VueHandler(w http.ResponseWriter, r *http.Request) {
+	renderPage(w, "adb", PageData{IsAdmin: getUserFromContext(r.Context()).Admin})
 }
 
 var templates = template.Must(template.New("").Funcs(
@@ -520,52 +400,6 @@ func sendErrorMessage(w io.Writer, err error) {
 	writeJSON(w, map[string]string{
 		"status":  "error",
 		"message": err.Error(),
-	})
-}
-
-func (c MainController) UpdateEventHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var event model.Event
-	if eventIDStr, ok := vars["event_id"]; ok {
-		eventID, err := strconv.Atoi(eventIDStr)
-		if err != nil {
-			panic(err)
-		}
-		event, err = model.GetEvent(c.db, model.GetEventOptions{EventID: eventID})
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	renderPage(w, "event_new", PageData{
-		PageName: "NewEvent",
-		Data: map[string]interface{}{
-			"Event": event,
-		},
-		IsAdmin: getUserFromContext(r.Context()).Admin,
-	})
-}
-
-func (c MainController) UpdateConnectionHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	var event model.Event
-	if eventIDStr, ok := vars["event_id"]; ok {
-		eventID, err := strconv.Atoi(eventIDStr)
-		if err != nil {
-			panic(err)
-		}
-		event, err = model.GetEvent(c.db, model.GetEventOptions{EventID: eventID})
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	renderPage(w, "connection_new", PageData{
-		PageName: "NewConnection",
-		Data: map[string]interface{}{
-			"Event": event,
-		},
-		IsAdmin: getUserFromContext(r.Context()).Admin,
 	})
 }
 

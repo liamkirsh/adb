@@ -9,6 +9,7 @@ import WorkingGroupList from 'WorkingGroupList.vue';
 
 Vue.use(VueRouter);
 
+// NOTE: If you add a new path here, you have to add it to main.go as well.
 const routes = [
     // Events
     { path: '/', component: EventEdit, props: { id: "0" } },
