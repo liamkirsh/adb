@@ -1,5 +1,10 @@
 <template>
-  <div id="app" class="main">
+  <div class="main body-wrapper-wide working-group-list-content">
+    <div class="title">
+      <h1>Working Groups</h1>
+      <br />
+    </div>
+
     <button class="btn btn-default" @click="showModal('edit-working-group-modal')"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add New Working Group</button>
     &nbsp;&nbsp;&nbsp;&nbsp;
     <button id="showMem" class="btn btn-default" onclick="$('.wgMembers').show(); $('#showMem').hide(); $('#hideMem').show();"><span class="glyphicon glyphicon-eye-open"></span>&nbsp;&nbsp;Show members</button>
@@ -192,7 +197,6 @@ import BasicSelect from 'external/search-select/BasicSelect.vue';
 Vue.use(vmodal);
 
 export default {
-  name: 'working-group-list',
   methods: {
     showModal: function(modalName, workingGroup, index) {
       // Check to see if there's a modal open, and close it if so.

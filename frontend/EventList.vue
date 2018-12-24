@@ -1,9 +1,10 @@
 <template>
-  <div class="body-wrapper-wide event-list-content">
+  <div class="main body-wrapper-wide event-list-content">
     <div class="title">
       <h1>{{connections ? "All Maintenance Connections" : "Events"}}</h1>
-      <br>
+      <br />
     </div>
+
     <div>
       <form class="form-inline" v-on:submit.prevent="eventListRequest">
         <label for="event-name">{{connections ? "Connector" : "Event Name"}}:</label>

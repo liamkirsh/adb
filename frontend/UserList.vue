@@ -1,6 +1,10 @@
 <template>
+  <div class="main body-wrapper-wide activist-list-content">
+    <div class="title">
+      <h1>Users</h1>
+      <br />
+    </div>
 
-  <div id="app" class="main">
     <button class="btn btn-default" @click="showModal('edit-user-modal')">Add New User</button>
     <table id="user-list" class="adb-table table table-hover table-striped tablesorter">
       <thead>
@@ -66,7 +70,6 @@ const DescOrder = 2;
 const AscOrder = 1;
 
 export default {
-  name: 'user-list',
   methods: {
     showModal: function (modalName, user, index) {
       // Check to see if there's a modal open, and close it if so.

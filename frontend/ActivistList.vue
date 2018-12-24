@@ -1,5 +1,10 @@
 <template>
-  <div id="app" class="main">
+  <div class="main body-wrapper-extra-wide activist-list-content">
+    <div class="title">
+      <h1>{{title}}</h1>
+      <br />
+    </div>
+
     <div class="activist-list-filters form-inline">
       <input v-on:input="debounceSearchInput" class="form-control filter-margin" type="text"
         placeholder="Search" />
@@ -812,8 +817,8 @@ function generateDateSortFn(field, ascending) {
 }
 
 export default {
-  name: 'activist-list',
   props: {
+    title: String,
     // `view` is the default view to show. It can be one of:
     // "all_activists", "leaderboard", "activist_pool",
     // "activist_recruitment", or "action_team"

@@ -1,12 +1,12 @@
 <template>
-  <div class="body-wrapper event-new-content">
+  <div class="main body-wrapper event-new-content">
     <!-- TODO(mdempsky): Is this okay? Should this go somewhere else? -->
     <link rel="stylesheet" href="/static/external/awesomplete/awesomplete.css">
 
     <div class="title">
       <h1>{{connections ? "Maintenance Connection" : "Event"}}</h1>
+      <br />
     </div>
-    <br>
 
     <div class="main">
       <form action id="eventForm" v-on:change="changed('change', -1)">
