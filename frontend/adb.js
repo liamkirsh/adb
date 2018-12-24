@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import AdbShell from 'AdbShell.vue';
 import ActivistList from 'ActivistList.vue';
 import CirclesList from 'CirclesList.vue';
 import EventEdit from 'EventEdit.vue';
@@ -47,7 +48,7 @@ const routes = [
 
 new Vue({
     el: "#adb",
-    template: "<router-view></router-view>",
+    render: (h) => h(AdbShell),
     router: new VueRouter({
         mode: "history",
         routes,

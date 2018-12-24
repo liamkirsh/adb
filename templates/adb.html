@@ -1,6 +1,27 @@
-{{template "header.html" .}}
+<!DOCTYPE html>
+<html lang="en">
 
-<div id="adb"></div>
-<script src="/dist/adb.js?{{.StaticResourcesHash}}"></script>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-{{template "footer.html" .}}
+    <title>Activist Database</title>
+    <link rel="icon" href="/static/img/favicon.ico">
+
+    <link href="/static/external/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css?{{ .StaticResourcesHash }}">
+    <link rel="stylesheet" type="text/css" href="/static/css/flash_message.css">
+
+    <script src="/static/external/jquery-3.2.1.js"></script>
+    <!-- for collapsed navbar -->
+    <script src="/static/external/bootstrap/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div id="adb"></div>
+    <script src="/dist/adb.js?{{.StaticResourcesHash}}" defer></script>
+</body>
+
+</html>
